@@ -6,20 +6,30 @@ use Scandiweb\Models\Product;
 
 class DVD extends Product
 {
-    public function __construct(string $sku, string $name, string $priceInput, string $typeValue)
+    public function validateTypeProperty()
     {
-        parent::__construct($sku, $name, $priceInput);
-        $this->typeProperty = 'Size';
-        $this->typeValue = $typeValue;
+        if ($this->data->typeProperty !== 'Size') {
+            array_push($this->errors, "Invalid product type.");
+        }
+        return "Valid property type";
     }
 
-    public function getTypeProperty(): string
+    public function validateTypeValue()
     {
-        return $this->typeProperty;
-    }
+        $typeValue = $this->data->typeValue;
 
-    public function getTypeValue(): string
-    {
-        return $this->typeValue;
+        if (!is_numeric($typeValue)) {
+            array_push($this->errors, "Size must be a number.");
+        }
+
+        if (!isset($this->data->typeValue) || $this->data->typeValue === '') {
+            array_push($this->errors, "Please provide a valid size.");
+        }
+
+        if ($typeValue > 10000) {
+            array_push($this->errors, "size value cannot be greater than 10000.");
+        }
+
+        return "Valid size.";
     }
 }

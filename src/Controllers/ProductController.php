@@ -35,4 +35,11 @@ class ProductController
         $data = $productList->deleteProduct();
         return $data;
     }
+
+    public function test()
+    {
+        $productList = new ProductList($this->db);
+        $data = $productList->validateInput();
+        return $data;
+    }
 }

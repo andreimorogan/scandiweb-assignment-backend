@@ -6,25 +6,25 @@ use Scandiweb\Models\Product;
 
 class Furniture extends Product
 {
-    public function __construct(string $sku, string $name, string $priceInput, string $typeValue)
+    public function validateTypeProperty()
     {
-        parent::__construct($sku, $name, $priceInput);
-        $this->typeProperty = 'Dimensions';
-        $this->typeValue = $typeValue;
+        if ($this->data->typeProperty !== 'Dimensions') {
+            array_push($this->errors, "Invalid product type.");
+        }
+        return "Valid property type";
     }
 
-    public function getTypeProperty(): string
+    public function validateTypeValue()
     {
-        return $this->typeProperty;
-    }
+        $typeValue = $this->data->typeValue;
 
-    public function getTypeValue(): string
-    {
-        return $this->typeValue;
-    }
+        if (!preg_match('/^(\d{1,4}(\.\d{1,2})?x){2}\d{1,4}(\.\d{1,2})?$/', $typeValue)) {
+            array_push(
+                $this->errors,
+                "Dimensions are limited to numbers of 3000 each, with a max of two decimals."
+            );
+        }
 
-    public function test()
-    {
-        echo "Success";
+        return "Valid dimensions.";
     }
 }

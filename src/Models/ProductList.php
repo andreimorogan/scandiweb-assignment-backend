@@ -2,14 +2,53 @@
 
 namespace Scandiweb\Models;
 
+use Scandiweb\Models\Product;
+use Scandiweb\Models\Subclasses\Furniture;
+use Scandiweb\Models\Subclasses\DVD;
+use Scandiweb\Models\Subclasses\Book;
+
 class ProductList
 {
     private $db;
+    private array $validationClasses;
+    private $request;
+
 
     public function __construct($db)
     {
         $this->db = $db;
+        $this->validationClasses = [
+            "Size" => new DVD(),
+            "Weight" => new Book(),
+            "Dimensions" => new Furniture()
+        ];
+        $this->request = file_get_contents('php://input');
+        $this->request = json_decode($request);
     }
+
+    public function validateInput()
+    {
+        $request = file_get_contents('php://input');
+        $requestData = json_decode($request);
+
+        $propertyType = $requestData->typeProperty;
+        $propertyValue = $requestData->typeValue;
+        $validator = $this->validationClasses[$propertyType] ?? null;
+        if (!$validator) {
+            $errors = ["Invalid property type."];
+            return $errors;
+        }
+
+        $validator->data = $requestData;
+        $validator->trimRequest();
+        $validator->validateTypeProperty();
+        $validator->validateSku();
+        $validator->validateName();
+        $validator->validatePrice();
+        $validator->validateTypeValue();
+        return $validator->errors;
+    }
+
 
     public function getAllProducts()
     {
@@ -32,6 +71,7 @@ class ProductList
         $statement->bindParam(':property_type', $data->typeProperty);
         $statement->bindParam(':property_value', $data->typeValue);
         $statement->execute();
+
         return "Product created successfully";
     }
 
@@ -48,6 +88,7 @@ class ProductList
             $statement->bindParam(':sku', $sku);
             $statement->execute();
         }
+
         return "Products deleted successfully";
     }
 }
