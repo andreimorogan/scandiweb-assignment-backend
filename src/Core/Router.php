@@ -5,7 +5,7 @@ namespace Scandiweb\Core;
 class Router
 {
     private $routes = [];
-    private $allowedOrigins = ['http://localhost:3000'];
+    private $allowedOrigins = ['https://andreimorogan.github.io'];
 
     public function addRoute($method, $path, $handler)
     {
