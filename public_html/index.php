@@ -25,8 +25,4 @@ $router->addRoute('POST', '/delete', function () use ($productController) {
     echo json_encode($productController->delete()); // Preflight requests are not available on 000webhost
 });
 
-$router->addRoute('POST', '/test', function () use ($productController) {
-    echo json_encode($productController->test()); // Preflight requests are not available on 000webhost
-});
-
 $router->dispatch();

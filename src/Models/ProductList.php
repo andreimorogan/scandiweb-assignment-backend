@@ -11,7 +11,7 @@ class ProductList
 {
     private $db;
     private array $validationClasses;
-    private $request;
+    private $requestData;
 
 
     public function __construct($db)
@@ -22,24 +22,21 @@ class ProductList
             "Weight" => new Book(),
             "Dimensions" => new Furniture()
         ];
-        $this->request = file_get_contents('php://input');
-        $this->request = json_decode($request);
+        $request = file_get_contents('php://input');
+        $this->requestData = json_decode($request);
     }
 
     public function validateInput()
     {
-        $request = file_get_contents('php://input');
-        $requestData = json_decode($request);
-
-        $propertyType = $requestData->typeProperty;
-        $propertyValue = $requestData->typeValue;
+        $propertyType = $this->requestData->typeProperty;
+        $propertyValue = $this->requestData->typeValue;
         $validator = $this->validationClasses[$propertyType] ?? null;
         if (!$validator) {
             $errors = ["Invalid property type."];
             return $errors;
         }
 
-        $validator->data = $requestData;
+        $validator->data = $this->requestData;
         $validator->trimRequest();
         $validator->validateTypeProperty();
         $validator->validateSku();
@@ -58,18 +55,21 @@ class ProductList
 
     public function createProduct()
     {
-        $request = file_get_contents('php://input');
-        $data = json_decode($request);
+        $validationErrors = $this->validateInput();
+        if (!empty($validationErrors)) {
+            return $validationErrors;
+        }
+
         $statement = $this->db->prepare(
             'INSERT INTO products (sku, name, price, property_type, property_value) 
             VALUES (:sku, :name, :price, :property_type, :property_value)'
         );
 
-        $statement->bindParam(':sku', $data->sku);
-        $statement->bindParam(':name', $data->name);
-        $statement->bindParam(':price', $data->price);
-        $statement->bindParam(':property_type', $data->typeProperty);
-        $statement->bindParam(':property_value', $data->typeValue);
+        $statement->bindParam(':sku', $this->requestData->sku);
+        $statement->bindParam(':name', $this->requestData->name);
+        $statement->bindParam(':price', $this->requestData->price);
+        $statement->bindParam(':property_type', $this->requestData->typeProperty);
+        $statement->bindParam(':property_value', $this->requestData->typeValue);
         $statement->execute();
 
         return "Product created successfully";
@@ -77,14 +77,13 @@ class ProductList
 
     public function deleteProduct()
     {
-        $request = file_get_contents('php://input');
-        $data = json_decode($request);
         $statement = $this->db->prepare(
             'DELETE FROM products
             WHERE sku=:sku'
         );
 
-        foreach ($data as $sku) {
+        foreach ($this->requestData as $sku) {
+            trim($sku);
             $statement->bindParam(':sku', $sku);
             $statement->execute();
         }
