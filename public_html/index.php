@@ -1,15 +1,12 @@
 <?php
 
-require_once(__DIR__ . '/../vendor/autoload.php');
+require_once(__DIR__ . '/../src/Autoload/Autoloader.php');
 
+use Scandiweb\Autoload\Autoloader;
 use Scandiweb\Core\Router;
 use Scandiweb\Controllers\ProductController;
 
-
-header("Access-Control-Allow-Origin: http://localhost:3000");
-header("Access-Control-Allow-Methods: GET");
-header("Content-Type: application/json");
-
+Autoloader::register();
 $router = new Router();
 $productController = new ProductController();
 
